@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三星堆考古盲盒</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: radial-gradient(ellipse at top, #1a1510 0%, #0d0b09 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 背景装饰 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(139, 69, 19, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(205, 133, 63, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(218, 165, 32, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            animation: bgPulse 15s ease-in-out infinite;
+        }
+
+        @keyframes bgPulse {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.1) rotate(2deg); opacity: 0.8; }
+        }
+
+        /* 金色粒子 */
+        .particle {
+            position: fixed;
+            width: 3px;
+            height: 3px;
+            background: #DAA520;
+            border-radius: 50%;
+            opacity: 0.4;
+            pointer-events: none;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0.2; }
+            50% { transform: translateY(-30px) translateX(10px); opacity: 0.6; }
+        }
+
+        .title {
+            font-size: 32px;
+            color: #f5e6c8;
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-shadow:
+                0 2px 4px rgba(0,0,0,0.5),
+                0 0 30px rgba(218, 165, 32, 0.3),
+                0 0 60px rgba(218, 165, 32, 0.1);
+            position: relative;
+        }
+
+        .title::before, .title::after {
+            content: "◆";
+            color: #DAA520;
+            font-size: 14px;
+            margin: 0 15px;
+            opacity: 0.8;
+            vertical-align: middle;
+        }
+
+        .subtitle {
+            color: #a08060;
+            font-size: 13px;
+            letter-spacing: 6px;
+            margin-bottom: 35px;
+            text-transform: uppercase;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid rgba(218, 165, 32, 0.15);
+            box-shadow:
+                0 20px 60px rgba(0,0,0,0.5),
+                inset 0 1px 0 rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 20px;
+            right: 20px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(218, 165, 32, 0.4), transparent);
+        }
+
+        .dig-area {
+            width: 100%;
+            height: 360px;
+            background:
+                linear-gradient(180deg, rgba(222, 184, 135, 0.1) 0%, transparent 30%),
+                linear-gradient(180deg, #c4a574 0%, #8b6914 40%, #5c4033 100%);
+            border-radius: 18px;
+            position: relative;
+            overflow: hidden;
+            cursor: crosshair;
+            box-shadow:
+                inset 0 -15px 40px rgba(0,0,0,0.4),
+                inset 0 5px 20px rgba(255,255,255,0.1),
+                0 10px 30px rgba(0,0,0,0.3);
+            border: 2px solid rgba(139, 69, 19, 0.5);
+        }
+
+        .dig-area::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                radial-gradient(circle at 30% 40%, rgba(255,255,255,0.08) 1px, transparent 1px),
+                radial-gradient(circle at 70% 60%, rgba(255,255,255,0.05) 1px, transparent 1px),
+                radial-gradient(circle at 50% 80%, rgba(0,0,0,0.1) 1px, transparent 1px);
+            background-size: 20px 20px, 25px 25px, 15px 15px;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .artifact {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            z-index: 1;
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.4));
+        }
+
+        .artifact img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .dirt-layer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background:
+                linear-gradient(180deg, rgba(0,0,0,0.1) 0%, transparent 10%),
+                linear-gradient(180deg, #8B4513 0%, #654321 30%, #4a3728 60%, #2d1f16 100%);
+            z-index: 2;
+            transition: height 0.1s ease;
+            box-shadow: inset 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .dirt-layer::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: linear-gradient(180deg, rgba(101, 67, 33, 0.8) 0%, transparent 100%);
+        }
+
+        .dirt-particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: linear-gradient(135deg, #A0522D, #8B4513);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .progress-container {
+            margin-top: 24px;
+            padding: 18px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .progress-label {
+            color: #d4c4a8;
+            font-size: 14px;
+            margin-bottom: 12px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #B8860B 0%, #DAA520 30%, #FFD700 50%, #DAA520 70%, #B8860B 100%);
+            background-size: 200% 100%;
+            border-radius: 6px;
+            transition: width 0.2s ease;
+            box-shadow: 0 0 15px rgba(218, 165, 32, 0.4);
+            animation: shimmer 2s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .progress-text {
+            color: #DAA520;
+            font-weight: 700;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 20px;
+            text-shadow: 0 0 20px rgba(218, 165, 32, 0.3);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .hint {
+            color: rgba(212, 196, 168, 0.7);
+            font-size: 13px;
+            text-align: center;
+            margin-top: 18px;
+            letter-spacing: 1px;
+        }
+
+        .hint-icon {
+            display: inline-block;
+            animation: mouseWiggle 2s ease-in-out infinite;
+        }
+
+        @keyframes mouseWiggle {
+            0%, 100% { transform: rotate(-10deg); }
+            50% { transform: rotate(10deg); }
+        }
+
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(26, 21, 16, 0.98) 0%, rgba(13, 11, 9, 0.99) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+        }
+
+        .celebration.show { opacity: 1; visibility: visible; }
+
+        .celebration h2 {
+            color: #FFD700;
+            font-size: 36px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 40px rgba(255, 215, 0, 0.5);
+            letter-spacing: 4px;
+            animation: titleGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0 0 40px rgba(255, 215, 0, 0.4); }
+            50% { text-shadow: 0 0 60px rgba(255, 215, 0, 0.7), 0 0 100px rgba(255, 215, 0, 0.3); }
+        }
+
+        .celebration-subtitle {
+            color: #a08060;
+            font-size: 14px;
+            letter-spacing: 3px;
+            margin-bottom: 40px;
+        }
+
+        .celebration-artifact {
+            width: 220px;
+            position: relative;
+            animation: artifactReveal 1s ease-out, bounce 2s ease-in-out infinite 1s;
+            filter: drop-shadow(0 20px 60px rgba(218, 165, 32, 0.3));
+        }
+
+        @keyframes artifactReveal {
+            0% { transform: scale(0.5) translateY(50px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        .celebration-artifact img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .artifact-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(218, 165, 32, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: glowPulse 3s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .restart-btn {
+            margin-top: 45px;
+            padding: 16px 48px;
+            font-size: 16px;
+            color: #1a1510;
+            background: linear-gradient(135deg, #DAA520 0%, #FFD700 50%, #DAA520 100%);
+            background-size: 200% 100%;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 700;
+            letter-spacing: 2px;
+            box-shadow:
+                0 8px 25px rgba(218, 165, 32, 0.3),
+                inset 0 1px 0 rgba(255,255,255,0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .restart-btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 12px 35px rgba(218, 165, 32, 0.4),
+                inset 0 1px 0 rgba(255,255,255,0.4);
+        }
+
+        .restart-btn:hover::before {
+            left: 100%;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            pointer-events: none;
+            animation: confettiFall linear infinite;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* 角落装饰 */
+        .corner-decor {
+            position: fixed;
+            width: 120px;
+            height: 120px;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        .corner-decor.top-left {
+            top: 20px;
+            left: 20px;
+            border-top: 2px solid #DAA520;
+            border-left: 2px solid #DAA520;
+        }
+
+        .corner-decor.top-right {
+            top: 20px;
+            right: 20px;
+            border-top: 2px solid #DAA520;
+            border-right: 2px solid #DAA520;
+        }
+
+        .corner-decor.bottom-left {
+            bottom: 20px;
+            left: 20px;
+            border-bottom: 2px solid #DAA520;
+            border-left: 2px solid #DAA520;
+        }
+
+        .corner-decor.bottom-right {
+            bottom: 20px;
+            right: 20px;
+            border-bottom: 2px solid #DAA520;
+            border-right: 2px solid #DAA520;
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景粒子 -->
+    <div class="particle" style="top: 10%; left: 15%; animation-delay: 0s;"></div>
+    <div class="particle" style="top: 25%; left: 80%; animation-delay: 1s;"></div>
+    <div class="particle" style="top: 60%; left: 10%; animation-delay: 2s;"></div>
+    <div class="particle" style="top: 75%; left: 85%; animation-delay: 3s;"></div>
+    <div class="particle" style="top: 40%; left: 90%; animation-delay: 1.5s;"></div>
+    <div class="particle" style="top: 85%; left: 40%; animation-delay: 2.5s;"></div>
+    <div class="particle" style="top: 15%; left: 50%; animation-delay: 0.5s;"></div>
+    <div class="particle" style="top: 55%; left: 25%; animation-delay: 3.5s;"></div>
+
+    <!-- 角落装饰 -->
+    <div class="corner-decor top-left"></div>
+    <div class="corner-decor top-right"></div>
+    <div class="corner-decor bottom-left"></div>
+    <div class="corner-decor bottom-right"></div>
+
+    <h1 class="title">三星堆考古盲盒</h1>
+    <div class="subtitle">Sanxingdui Archaeological Blind Box</div>
+
+    <div class="container">
+        <div class="dig-area" id="digArea">
+            <div class="artifact" id="artifact">
+                <img src="01525ddc-a5d8-40ec-94b2-1172a66d602a.png" alt="三星堆青铜人头像">
+            </div>
+            <div class="dirt-layer" id="dirtLayer"></div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-label">挖掘进度 EXCAVATION PROGRESS</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">0%</div>
+        </div>
+
+        <div class="hint"><span class="hint-icon">🖱️</span> 按住鼠标拖动来挖掘文物</div>
+    </div>
+
+    <div class="celebration" id="celebration">
+        <h2>恭喜发现文物</h2>
+        <div class="celebration-subtitle">ARCHAEOLOGICAL DISCOVERY</div>
+        <div class="celebration-artifact">
+            <div class="artifact-glow"></div>
+            <img src="01525ddc-a5d8-40ec-94b2-1172a66d602a.png" alt="三星堆青铜人头像">
+        </div>
+        <button class="restart-btn" onclick="restartGame()">再来一次</button>
+    </div>
+
+    <script>
+        const digArea = document.getElementById("digArea");
+        const dirtLayer = document.getElementById("dirtLayer");
+        const progressFill = document.getElementById("progressFill");
+        const progressText = document.getElementById("progressText");
+        const celebration = document.getElementById("celebration");
+
+        let isDigging = false;
+        let progress = 0;
+        let audioContext = null;
+        let dirtHeight = 250;
+
+        dirtLayer.style.height = dirtHeight + "px";
+
+        function getAudioContext() {
+            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            return audioContext;
+        }
+
+        function playDigSound() {
+            const ctx = getAudioContext();
+            const noise = ctx.createBufferSource();
+            const noiseBuffer = ctx.createBuffer(1, ctx.sampleRate * 0.1, ctx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < noiseBuffer.length; i++) {
+                output[i] = Math.random() * 2 - 1;
+            }
+            noise.buffer = noiseBuffer;
+
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 800 + Math.random() * 400;
+
+            const gainNode = ctx.createGain();
+            gainNode.gain.setValueAtTime(0.15, ctx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+
+            noise.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(ctx.destination);
+
+            noise.start(ctx.currentTime);
+            noise.stop(ctx.currentTime + 0.1);
+        }
+
+        function playSuccessSound() {
+            const ctx = getAudioContext();
+            const notes = [523.25, 659.25, 783.99, 1046.50];
+            notes.forEach(function(freq, index) {
+                setTimeout(function() {
+                    const oscillator = ctx.createOscillator();
+                    const gainNode = ctx.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(ctx.destination);
+                    oscillator.type = "sine";
+                    oscillator.frequency.setValueAtTime(freq, ctx.currentTime);
+                    gainNode.gain.setValueAtTime(0.4, ctx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    oscillator.start(ctx.currentTime);
+                    oscillator.stop(ctx.currentTime + 0.3);
+                }, index * 150);
+            });
+        }
+
+        function createDirtParticle(x, y) {
+            const particle = document.createElement("div");
+            particle.className = "dirt-particle";
+            particle.style.left = x + "px";
+            particle.style.top = y + "px";
+            digArea.appendChild(particle);
+
+            const angle = Math.random() * Math.PI - Math.PI / 2;
+            const distance = 15 + Math.random() * 25;
+            const duration = 0.2 + Math.random() * 0.2;
+
+            particle.style.transition = "all " + duration + "s ease-out";
+
+            setTimeout(function() {
+                const offsetX = Math.cos(angle) * distance;
+                const offsetY = Math.sin(angle) * distance - 15;
+                particle.style.transform = "translate(" + offsetX + "px, " + offsetY + "px)";
+                particle.style.opacity = "0";
+            }, 10);
+
+            setTimeout(function() { particle.remove(); }, duration * 1000);
+        }
+
+        function createConfetti() {
+            const colors = ["#FFD700", "#DAA520", "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7"];
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement("div");
+                confetti.className = "confetti";
+                confetti.style.left = Math.random() * 100 + "%";
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDuration = (3 + Math.random() * 3) + "s";
+                confetti.style.animationDelay = Math.random() * 2 + "s";
+                celebration.appendChild(confetti);
+            }
+        }
+
+        function handleDig(x, y) {
+            if (!isDigging || progress >= 100) return;
+
+            playDigSound();
+
+            for (let i = 0; i < 3; i++) {
+                setTimeout(function() {
+                    createDirtParticle(x + (Math.random() - 0.5) * 20, y + (Math.random() - 0.5) * 20);
+                }, i * 30);
+            }
+
+            progress += 1;
+            if (progress > 100) progress = 100;
+
+            dirtHeight = 250 - (progress / 100) * 230;
+            if (dirtHeight < 20) dirtHeight = 20;
+            dirtLayer.style.height = dirtHeight + "px";
+
+            progressFill.style.width = progress + "%";
+            progressText.textContent = Math.round(progress) + "%";
+
+            if (progress >= 100) {
+                setTimeout(function() {
+                    playSuccessSound();
+                    createConfetti();
+                    celebration.classList.add("show");
+                }, 300);
+            }
+        }
+
+        digArea.addEventListener("mousedown", function(e) {
+            isDigging = true;
+            const rect = digArea.getBoundingClientRect();
+            handleDig(e.clientX - rect.left, e.clientY - rect.top);
+        });
+
+        digArea.addEventListener("mousemove", function(e) {
+            if (isDigging) {
+                const rect = digArea.getBoundingClientRect();
+                handleDig(e.clientX - rect.left, e.clientY - rect.top);
+            }
+        });
+
+        digArea.addEventListener("mouseup", function() { isDigging = false; });
+        digArea.addEventListener("mouseleave", function() { isDigging = false; });
+
+        digArea.addEventListener("touchstart", function(e) {
+            e.preventDefault();
+            isDigging = true;
+            const touch = e.touches[0];
+            const rect = digArea.getBoundingClientRect();
+            handleDig(touch.clientX - rect.left, touch.clientY - rect.top);
+        });
+
+        digArea.addEventListener("touchmove", function(e) {
+            e.preventDefault();
+            if (isDigging) {
+                const touch = e.touches[0];
+                const rect = digArea.getBoundingClientRect();
+                handleDig(touch.clientX - rect.left, touch.clientY - rect.top);
+            }
+        });
+
+        digArea.addEventListener("touchend", function() { isDigging = false; });
+
+        function restartGame() {
+            celebration.classList.remove("show");
+            celebration.querySelectorAll(".confetti").forEach(function(el) { el.remove(); });
+            progress = 0;
+            dirtHeight = 250;
+            dirtLayer.style.height = dirtHeight + "px";
+            progressFill.style.width = "0%";
+            progressText.textContent = "0%";
+        }
+    </script>
+</body>
+</html>
